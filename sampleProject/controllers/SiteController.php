@@ -70,7 +70,6 @@ class SiteController extends Controller
         else{
             return $this->render('front');
         }
-        
     }
 
     public function actionCreate(){
