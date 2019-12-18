@@ -62,7 +62,7 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        if (!Yii::$app->user->isGuest) {
+        if(!Yii::$app->user->isGuest) {
             $course = Course::find()->all();
             return $this->render('home',['course' => $course]);
         }
@@ -74,44 +74,64 @@ class SiteController extends Controller
     }
 
     public function actionCreate(){
-        $course = new Course();
-        $formData = Yii::$app->request->post();
-        $course->load($formData);
-        if($course->load($formData)){
-            if($course->save()){
-                Yii::$app->getSession()->setFlash('message','New Student Enrolled Successfully');
-                return $this->redirect(['index']);
-            }
-            else{
-                Yii::$app->getSession()->setFlash('message','Student Enrollement Failed');
-            }
-        } 
-        return $this->render('create', ['course' => $course]);
+        if(!Yii::$app->user->isGuest) {
+            $course = new Course();
+            $formData = Yii::$app->request->post();
+            $course->load($formData);
+            if($course->load($formData)){
+                if($course->save()){
+                    Yii::$app->getSession()->setFlash('message','New Student Enrolled Successfully');
+                    return $this->redirect(['index']);
+                }
+                else{
+                    Yii::$app->getSession()->setFlash('message','Student Enrollement Failed');
+                }
+            } 
+            return $this->render('create', ['course' => $course]);
+        }
+        else{
+            return $this->render('front');
+        }
     }
 
     public function actionView($id){
-        $course = Course::findOne($id);
-        return $this->render('view', ['course' => $course]);
+        if(!Yii::$app->user->isGuest) {
+            $course = Course::findOne($id);
+            return $this->render('view', ['course' => $course]);
+        }
+        else{
+            return $this->render('front');
+        }
     }
 
     public function actionUpdate($id){
         // echo $id;
-         $course = Course::findOne($id);
-        if($course->load(Yii::$app->request->post()) && $course-> save() ){
-            Yii::$app->getSession()->setFlash('message','Student Details updated Successfully');
-            return $this->redirect(['index', 'id' => $course->id]);
+        if(!Yii::$app->user->isGuest) {
+            $course = Course::findOne($id);
+            if($course->load(Yii::$app->request->post()) && $course-> save() ){
+                Yii::$app->getSession()->setFlash('message','Student Details updated Successfully');
+                return $this->redirect(['index', 'id' => $course->id]);
+            }
+            else{
+                return $this->render('update', ['course' => $course]);
+            }
         }
         else{
-            return $this->render('update', ['course' => $course]);
-        }
+            return $this->render('front');
+        }   
     }
 
     public function actionDelete($id){
-        $course = Course::findOne($id)->delete();
-        if($course){
-            Yii::$app->getSession()->setFlash('message', 'Student Details deleted successfully');
-            return $this->redirect(['index']);
+        if(!Yii::$app->user->isGuest) {
+            $course = Course::findOne($id)->delete();
+            if($course){
+                Yii::$app->getSession()->setFlash('message', 'Student Details deleted successfully');
+                return $this->redirect(['index']);
+            }
         }
+        else{
+            return $this->render('front');
+        }    
     }
 
     /**
